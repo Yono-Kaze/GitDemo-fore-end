@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+  	<!-- 引入jquery 1，文件引入的先后顺序，应该先引入jquery再引入bootstrap，也就是把这两个文件的出现顺序换一下。-->
+	<script type="text/javascript" src="static/js/jquery-3.5.1.min.js"></script>
+	<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+    <script src="static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+	<!-- 引入Bootstrap样式 -->
+	<link href="static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+	</head>
+	<body>
+			<!-- 搭建平台显示页面 -->
+			<div class="container">
+			<!-- 标题 -->
+			<div class="row">
+				<div class="col-md-12">
+					<h1>员工管理系统-部门部分</h1>
+				</div>
+			</div>
+			
+			<!-- 按钮 -->
+			<div class="row">
+				<div class="col-md-4 col-md-offset-8">
+					<button class="btn btn-info" id="depts_add_model_btn">新增</button>
+				</div>
+			</div>
+			
+			<!-- 显示表格 -->
+			<div class="row">
+				<div class="col-md-12">
+				<table class="table table-hover" id="depts_table">
+					<thead>
+						<tr>
+							<th>部门ID</th>
+							<th>部门</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+					<!-- 部门信息显示处 -->
+					</tbody>
+				</table>		
+				</div>
+			</div>
+			
+			<!-- 显示分页信息 -->
+			<div class="row">
+				<!-- 分页文字信息 -->
+				<div class="col-md-6" id="page_info_area">
+		
+				</div>
+				
+				<!-- 分页条信息 -->
+				<div class="col-md-6" id="page_nav_area">
+				
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+		//默认加载页面时候跳转到首页 
+		$(function(){
+			to_page(1);
+		});
+		
+		
+		 /* 页面加载完成以后，直接发送一个ajax请求，要求到数据 */
+		 function to_page(pn){
+				$.ajax({
+					url:"http://localhost:8001/depts",
+					data:"pn="+pn,
+					type:"GET",
+					success:function(result){
+						console.log(result); 
+						//1.解析json并显示部门数据
+							bulid_depts_table(result);
+						//2.解析json并显示分页信息
+							bulid_page_info(result);
+						//3.解析json并显示分页条信息
+							build_page_nav(result);
+					}
+				});
+			}
+		 //解析部门数据 
+		 function bulid_depts_table(result){
+			 //首先要清空table表 
+			 $("#depts_table tbody").empty();
+			 //获取result中的部门数据 
+			 var depts=result.extend.pageInfo.list;
+			 //遍历list列表
+			 $.each(depts,function(index,item){
+				//部门ID构建 
+				var deptIdTd=$("<td></td>").append(item.deptid);
+				//部门名称构建
+				var deptNameTd=$("<td></td>").append(item.deptname);
+				//构建编辑框按钮
+				var editBtn=$("<button></button>").addClass("btn btn-info btn-sm edit_btn")
+							.append($("<span></span>").addClass("glyphicon glyphicon-pencil")).append("编辑");
+							//给编辑按钮添加一个自定义属性，来表示当前部门id
+							editBtn.attr("edit-id",item.deptid);
+				//将构建的元素添加到页面中的tbody
+				$("<tr></tr>").append(checkBoxTd)
+					.append(deptIdTd)
+					.append(deptNameTd)
+					.append(editBtn)
+					.appendTo("#depts_table tbody");
+							
+			 });
+		 
+		 }
+		 
+		 
+		
+		
+		
+		</script>
+		
+	
+	</body>
+</html>
