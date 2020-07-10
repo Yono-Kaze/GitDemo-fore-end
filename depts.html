@@ -11,6 +11,61 @@
 	<link href="static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
 	</head>
 	<body>
+	<!-- 部门添加的模块框 -->
+	<div class="modal fade" id="deptAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">部门添加</h4>
+	      </div>
+	      <div class="modal-body">
+	        <form class="form-horizontal">
+			  <div class="form-group">
+			    <label for="inputEmail3" class="col-sm-2 control-label">部门名称</label>
+			    <div class="col-sm-10">
+			      <input type="text" name="deptname" class="form-control" id="deptname_add_input" >
+			      <span id="helpBlock2" class="help-block"></span>
+			    </div>
+			  </div>	
+			</form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+	        <button type="button" class="btn btn-primary"  id="dept_save_btn">保存</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<!-- 部门更新的模块框 -->
+	<div class="modal fade" id="deptUpdateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">部门更新</h4>
+	      </div>
+	      <div class="modal-body">
+	        <form class="form-horizontal">
+			  <div class="form-group">
+			    <label for="inputEmail3" class="col-sm-2 control-label">部门名称</label>
+			    <div class="col-sm-10">
+			      <input type="text" name="deptname" class="form-control" id="deptname_update_input" >
+			      <span id="helpBlock2" class="help-block"></span>
+			    </div>
+			  </div>	
+			</form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+	        <button type="button" class="btn btn-primary"  id="dept_update_btn">保存</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	
 			<!-- 搭建平台显示页面 -->
 			<div class="container">
 			<!-- 标题 -->
@@ -23,7 +78,7 @@
 			<!-- 按钮 -->
 			<div class="row">
 				<div class="col-md-4 col-md-offset-8">
-					<button class="btn btn-info" id="depts_add_model_btn">新增</button>
+					<button class="btn btn-info" id="dept_add_model_btn">新增</button>
 				</div>
 			</div>
 			
@@ -59,6 +114,9 @@
 			</div>
 		</div>
 		<script type="text/javascript">
+		//记录总记录数和当前页数 
+		var totalRecord,currentPage;
+		
 		//默认加载页面时候跳转到首页 
 		$(function(){
 			to_page(1);
@@ -68,11 +126,11 @@
 		 /* 页面加载完成以后，直接发送一个ajax请求，要求到数据 */
 		 function to_page(pn){
 				$.ajax({
-					url:"http://localhost:8001/depts",
+					url:"http://localhost:8001/dept",
 					data:"pn="+pn,
 					type:"GET",
 					success:function(result){
-						console.log(result); 
+						//console.log(result); 
 						//1.解析json并显示部门数据
 							bulid_depts_table(result);
 						//2.解析json并显示分页信息
@@ -82,6 +140,9 @@
 					}
 				});
 			}
+		 
+		 
+		 
 		 //解析部门数据 
 		 function bulid_depts_table(result){
 			 //首先要清空table表 
@@ -98,20 +159,228 @@
 				var editBtn=$("<button></button>").addClass("btn btn-info btn-sm edit_btn")
 							.append($("<span></span>").addClass("glyphicon glyphicon-pencil")).append("编辑");
 							//给编辑按钮添加一个自定义属性，来表示当前部门id
+				var btnTd=$("<td></td>").append(editBtn);
 							editBtn.attr("edit-id",item.deptid);
 				//将构建的元素添加到页面中的tbody
-				$("<tr></tr>").append(checkBoxTd)
-					.append(deptIdTd)
+				$("<tr></tr>").append(deptIdTd)
 					.append(deptNameTd)
-					.append(editBtn)
+					.append(btnTd)
 					.appendTo("#depts_table tbody");
 							
 			 });
 		 
 		 }
 		 
-		 
+		//解析json并显示分页信息
+		function bulid_page_info(result){
+			//清空分页信息
+			$("#page_info_area").empty();
+			$("#page_info_area").append("当前"+result.extend.pageInfo.pageNum+"页，总"+
+					result.extend.pageInfo.pages+"页,总共"+
+					result.extend.pageInfo.total+"条记录");	
+			totalRecord=result.extend.pageInfo.total;
+			currentPage=result.extend.pageInfo.pageNum;		
+		}
 		
+		//解析json并显示分页条信息
+		function build_page_nav(result){
+			//清空分页条信息
+			$("#page_nav_area").empty();	
+			var ul=$("<ul></ul>").addClass("pagination");	    
+			//构建首页元素,构建前一页元素
+			var firspPageLi=$("<li></li>")
+					.append($("<a></a>").append("首页").attr("href","#"));
+			var prePageLi=$("<li></li>")
+					.append($("<a></a>").append("&laquo;"));
+				//判断前一页是否还有页数 
+				if(result.extend.pageInfo.hasPreviousPage==false){
+					//若没有，禁止前一页元素
+					firspPageLi.addClass("disabled");
+					prePageLi.addClass("disabled");
+				}else{
+					//为元素添加翻页事件
+					firspPageLi.click(function(){
+						to_page(1);
+					});
+					prePageLi.click(function(){
+						to_page(result.extend.pageInfo.pageNum-1);
+					});	
+				};
+			//构建后一页元素,构建末页元素
+			var nextPageLi=$("<li></li>")
+					.append($("<a></a>").append("&raquo;"));
+			var lastPageLi=$("<li></li>")
+			.append($("<a></a>").append("末页").attr("href","#"));
+				//判断后一页是否还有页数
+				if(result.extend.pageInfo.hasNextPage==false){
+					//若无，禁止翻页
+					nextPageLi.addClass("disabled");
+					lastPageLi.addClass("disabled");
+				}else{
+					//若有，添加翻页事件
+					lastPageLi.click(function(){
+						to_page(result.extend.pageInfo.pages);
+					});
+					nextPageLi.click(function(){
+						to_page(result.extend.pageInfo.pageNum+1);
+					});				
+				};
+		
+				//将首页和前一页添加到页面中
+				ul.append(firspPageLi).append(prePageLi);
+				//构建中间页元素
+				$.each(result.extend.pageInfo.navigatepageNums,function(index,item){
+					
+					var numLi =	$("<li></li>").append($("<a></a>").append(item));
+					if(result.extend.pageInfo.pageNum==item){
+						numLi.addClass("active");
+					};
+					numLi.click(function(){
+						to_page(item);
+					});
+					ul.append(numLi);
+				});
+				
+				//添加下一页和末页的提示
+				ul.append(nextPageLi).append(lastPageLi);
+				var navEle=$("<nav></nav>").append(ul);
+				navEle.appendTo("#page_nav_area");
+		}
+		
+	    //给新增按钮弹出模态框
+		$("#dept_add_model_btn").click(function(){
+			//表单重置(样式，数据)
+			//reset_form("#deptAddModal form");
+			//弹出模态框
+			$("#deptAddModal").modal({
+				backdrop:"static"
+			});
+		});
+	    /* 发送数据前进行表单校验---------------------------------------- */
+	    //显示校验结果的提示信息
+	   function show_validate_msg(ele,status,msg){
+				//清除当前元素的校验状态
+				$(ele).parent().removeClass("has-success has-error");
+				$(ele).next("span").text("");
+				if("success"==status){
+					$(ele).parent().addClass("has-success");
+					$(ele).next("span").text(msg);
+					
+				}else if("error"==status){
+					$(ele).parent().addClass("has-error");
+					$(ele).next("span").text(msg);
+				}
+		    }   
+	    
+		//发送请求前校验部门是否重复
+		$("#deptname_add_input").change(function(){
+			//发送ajax请求校验部门名是否重复
+			var deptName=this.value;
+			$.ajax({
+				url:"http://localhost:8001/checkdept",
+				data:"deptName="+deptName,
+				success:function(result){
+					if(result.code==100){
+						show_validate_msg("#deptname_add_input","success","部门名可用");
+						$("#dept_save_btn").attr("ajax-va","success");
+					}else{
+						show_validate_msg("#deptname_add_input","error",result.extend.va_msg);
+						$("#dept_save_btn").attr("ajax-va","error");
+					}
+					
+				}
+				
+				
+			});
+			
+			
+		});
+		
+		//更新前校验，部门是否重复 
+		$("#deptname_update_input").change(function(){
+			//发送ajax请求校验部门名是否重复
+			var deptName=this.value;
+			$.ajax({
+				url:"http://localhost:8001/checkdept",
+				data:"deptName="+deptName,
+				success:function(result){
+					if(result.code==100){
+						show_validate_msg("#deptname_update_input","success","部门名可用");
+						$("#dept_update_btn").attr("ajax-va","success");
+					}else{
+						show_validate_msg("#deptname_update_input","error",result.extend.va_msg);
+						$("#dept_update_btn").attr("ajax-va","error");
+					}
+					
+				}
+				
+				
+			});
+			
+			
+		});
+	   
+		/* ---------------------------------------- */
+		$("#dept_save_btn").click(function(){
+		    	//1.将模态框数据提交给服务器进行保存
+		    	//2.先对提交给服务器的数据进行校验		
+				if($(this).attr("ajax-va")=="error"){
+					return false;
+				};
+		    	//3.校验用用户名是否重复
+		    	//4.发送ajax请求保存部门
+		    	$.ajax({
+					url:"http://localhost:8001/adddept",
+					type:"POST",
+					data:$("#deptAddModal form").serialize(),
+					success:function(result){
+						console.log(result);
+						if(result.code==100){
+							//关闭模态框
+							$('#deptAddModal').modal('hide');
+							//跳转到最后一页
+							to_page(totalRecord);	
+						}
+	
+					}
+				}); 
+		    });
+		//1.查出部门信息，显示
+		function getDept(id){
+			$.ajax({
+				url:"http://localhost:8001/dept/"+id,
+				type:"GET",
+				success:function(result){
+					console.log(result);
+					
+				}
+			});
+			
+		}
+		
+		//给编辑按钮添加事件弹出模态框,注按钮是在页面加载后被创建的，所以在创建之前绑定click事件是无法绑定
+		$(document).on("click",".edit_btn",function(){
+				//1.查出部门信息，显示
+				getDept($(this).attr("edit-id"));
+				//3.传递员工的id给模态框
+				$("#dept_update_btn").attr("edit-id",$(this).attr("edit-id"));
+				//弹出模态框
+				$("#deptUpdateModal").modal({
+					backdrop:"static"
+				});
+	
+			});
+		
+		//点击更新，更新部门信息
+		$("#dept_update_btn").click(function(){
+			//1.校验部门是否重复 
+			if($(this).attr("ajax-va")=="error"){
+				return false;
+			};
+			
+			
+		});
+			
 		
 		
 		</script>
