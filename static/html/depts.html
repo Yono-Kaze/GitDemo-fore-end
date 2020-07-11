@@ -4,11 +4,11 @@
 		<meta charset="utf-8" />
 		<title></title>
   	<!-- 引入jquery 1，文件引入的先后顺序，应该先引入jquery再引入bootstrap，也就是把这两个文件的出现顺序换一下。-->
-	<script type="text/javascript" src="static/js/jquery-3.5.1.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.5.1.min.js"></script>
 	<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
-    <script src="static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <script src="../js/jquery-3.5.1.min.js"></script>
 	<!-- 引入Bootstrap样式 -->
-	<link href="static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="../bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
 	</head>
 	<body>
 	<!-- 部门添加的模块框 -->
@@ -77,6 +77,10 @@
 			
 			<!-- 按钮 -->
 			<div class="row">
+				<div class="col-md-4">
+					<a class="btn btn-default btn-info" href="emps.html" role="button">员工管理</a>
+					<a class="btn btn-default btn-danger" href="../../Main.html" role="button">退出</a>	
+				</div>
 				<div class="col-md-4 col-md-offset-8">
 					<button class="btn btn-info" id="dept_add_model_btn">新增</button>
 				</div>
@@ -352,7 +356,8 @@
 				type:"GET",
 				success:function(result){
 					console.log(result);
-					
+					var deptData=result.extend.dept
+					$("#deptname_update_input").val([deptData.deptname]);
 				}
 			});
 			
@@ -377,6 +382,21 @@
 			if($(this).attr("ajax-va")=="error"){
 				return false;
 			};
+			//发送ajax请求更新部门数据
+			$.ajax({
+				url:"http://localhost:8001/dept/"+$(this).attr("edit-id"),
+				type:"PUT",
+				data:$("#deptUpdateModal form").serialize(),
+				success:function(result){
+					alert(result.msg);
+					//1.关闭对话框
+					$("#deptUpdateModal").modal("hide");
+					//2.回到本页面
+					to_page(currentPage);
+				}
+				
+			});
+			
 			
 			
 		});
