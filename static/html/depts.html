@@ -6,9 +6,11 @@
   	<!-- 引入jquery 1，文件引入的先后顺序，应该先引入jquery再引入bootstrap，也就是把这两个文件的出现顺序换一下。-->
 	<script type="text/javascript" src="../js/jquery-3.5.1.min.js"></script>
 	<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
-    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
 	<!-- 引入Bootstrap样式 -->
 	<link href="../bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+	
+	
 	</head>
 	<body>
 	<!-- 部门添加的模块框 -->
@@ -253,8 +255,6 @@
 		
 	    //给新增按钮弹出模态框
 		$("#dept_add_model_btn").click(function(){
-			//表单重置(样式，数据)
-			//reset_form("#deptAddModal form");
 			//弹出模态框
 			$("#deptAddModal").modal({
 				backdrop:"static"
